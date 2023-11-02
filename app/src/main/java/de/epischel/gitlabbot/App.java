@@ -3,12 +3,27 @@
  */
 package de.epischel.gitlabbot;
 
+import java.util.List;
+
+import org.gitlab4j.api.GitLabApi;
+
 public class App {
+    private static final String GITLAB_URL = "https://gitlab.com";
+
     public String getGreeting() {
         return "Hello World!";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        final String token = System.getenv("GITLAB_TOKEN");
+        final String projectId = System.getenv("PROJECT_ID");
+        try (GitLabApi api = new GitLabApi(GITLAB_URL, token)) {
+            List<MergeRequestInfo> mergeRequests = new MergeRequestFetcher().fetchOpenMergeRequests(api, projectId);
+            System.out.println(
+                "Betrachte  " + mergeRequests.size() + " Merge Requests."                
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }        
     }
 }
